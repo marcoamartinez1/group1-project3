@@ -1,3 +1,4 @@
+// initializes storage arrays and dictionaries
 let fetchedData = {};
 let selectedOperators = [];
 
@@ -61,17 +62,17 @@ function updateMap(carrier) {
             // Collect all averageRSSI values for the selected carrier from filtered data
             var averageRSSIValues = data.features.map(feature => feature.properties.averageRSSI).filter(value => value !== null);
 
-            // Calculate new min and max for the selected carrier
+            // Calculates new min and max for the selected carrier
             var minRSSI = Math.min(...averageRSSIValues);
             var maxRSSI = Math.max(...averageRSSIValues);
 
-            // Define the colorscale
+            // Defines the colorscale
             var colorscale = [
-                [0, '#FFFFFF'],  // Lighter color for less negative values
-                [1, '#0000FF']   // Darker color for more negative values
+                [0, '#FFFFFF'], 
+                [1, '#0000FF']  
             ];
 
-            // Define the trace for the choropleth map
+            // Defines the trace for the choropleth map
             var trace = {
                 type: 'choropleth',
                 locationmode: 'USA-states',
@@ -92,7 +93,7 @@ function updateMap(carrier) {
                 }
             };
 
-            // Define the layout for the map
+            // Defines the layout for the map
             var layout = {
                 title: `Average RSSI by State (${carrier})`,
                 geo: {
@@ -132,13 +133,13 @@ function updateChart() {
         'AT&T': 'blue',
         'T-Mobile': 'magenta',
         'Verizon': 'red'
-        // Add more operators and their colors as needed
+        
     };
 
     selectedOperators.forEach(operator => {
         xValues.push(operator);
         yValues.push(fetchedData[operator][selectedMetric]);
-        barColors.push(colors[operator] || '#007bff'); // Default color if operator not found
+        barColors.push(colors[operator] || '#007bff');
     });
 
     var trace = {
@@ -155,10 +156,10 @@ function updateChart() {
         text: yValues.map(value => value.toFixed(2)),
         textposition: 'auto'
     };
-
+//creates layout for 
     var layout = {
         title: {
-            text: `Average ${selectedMetric} Comparison`,
+            text: `${selectedMetric} Comparison`,
             font: {
                 family: 'Arial, sans-serif',
                 size: 24
