@@ -68,9 +68,9 @@ for operator, states in operator_state_averages.items():
             operator_state_averages[operator][state][metric] = sum(values) / len(values)
 
 # Logging the precomputed averages for debugging
-app.logger.debug(f"Precomputed operator averages: {operator_averages}")
-app.logger.debug(f"Precomputed operator and county averages: {operator_county_averages}")
-app.logger.debug(f"Precomputed operator and state averages: {operator_state_averages}")
+#app.logger.debug(f"Precomputed operator averages: {operator_averages}")
+#app.logger.debug(f"Precomputed operator and county averages: {operator_county_averages}")
+#app.logger.debug(f"Precomputed operator and state averages: {operator_state_averages}")
 
 # Load the geoJSON files
 with open('us-states.json', encoding='utf-8') as f:
@@ -85,6 +85,7 @@ with open('us-states.json', encoding='utf-8') as f:
 #                 feature['properties'][operator] = data[name]
 #     return geojson
 
+# function to merge datasets
 def merge_averages_with_geojson(geojson, averages, key):
     for feature in geojson['features']:
         name = feature[key].strip()
@@ -100,15 +101,18 @@ states_geojson = merge_averages_with_geojson(states_geojson, operator_state_aver
 with open('merged_states.geojson', 'w') as f:
     json.dump(states_geojson, f)
 
+# dashboard will rendered when local host url is called
 @app.route('/')
 def index():
     return render_template('index.html')
 
+#route for operator names
 @app.route('/operators', methods=['GET'])
 def get_operators():
     operators = sorted(operator_averages.keys())
     return jsonify(operators)
 
+#route for operator average calculations
 @app.route('/averages', methods=['GET'])
 def get_averages():
     operator_name = request.args.get('operator').strip()
@@ -117,7 +121,7 @@ def get_averages():
         return jsonify({"error": "Operator name is required"}), 400
 
     # Log the requested operator name for debugging
-    app.logger.debug(f"Requested operator name: {operator_name}")
+    #app.logger.debug(f"Requested operator name: {operator_name}")
 
     if operator_name not in operator_averages:
         app.logger.debug(f"No data found for operator: {operator_name}")
@@ -125,6 +129,7 @@ def get_averages():
 
     return jsonify(operator_averages[operator_name])
 
+#route for counts of tests in states per carrier
 @app.route('/state-carrier-counts', methods=['GET'])
 def get_state_carrier_counts():
     state_totals = {state: sum(carriers.values()) for state, carriers in state_carrier_counts.items()}
@@ -132,15 +137,17 @@ def get_state_carrier_counts():
         'counts': state_carrier_counts,
         'totals': state_totals
     }
-    app.logger.debug(f"State Carrier Counts: {response}")
+    #app.logger.debug(f"State Carrier Counts: {response}")
     return jsonify(response)
 
+#route for state names
 @app.route('/states', methods=['GET'])
 def get_states():
     states = sorted(state_carrier_counts.keys())
     app.logger.debug(f"States: {states}")
     return jsonify(states)
 
+#route for state averages
 @app.route('/state_averages', methods=['GET'])
 def get_state_averages():
     operator_name = request.args.get('operator').strip()
@@ -153,7 +160,7 @@ def get_state_averages():
         return jsonify({"error": "State name is required"}), 400
 
     # Log the requested operator and state names for debugging
-    app.logger.debug(f"Requested operator name: {operator_name}, state name: {state_name}")
+    #app.logger.debug(f"Requested operator name: {operator_name}, state name: {state_name}")
 
     if operator_name not in operator_state_averages or state_name not in operator_state_averages[operator_name]:
         app.logger.debug(f"No data found for operator: {operator_name} in state: {state_name}")
@@ -161,7 +168,7 @@ def get_state_averages():
 
     return jsonify(operator_state_averages[operator_name][state_name])
 
-
+# route to return the merged file for map creation
 @app.route('/geojson/states')
 def get_states_geojson():
     return send_file('merged_states.geojson')
